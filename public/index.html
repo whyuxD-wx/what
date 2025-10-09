@@ -110,7 +110,7 @@
     .flex { display:flex; gap:8px; align-items:center; }
     .flex > * { flex:1 }
     
-    .modal {
+  .modal {
   display: none; 
   position: fixed; 
   z-index: 1000; 
@@ -165,6 +165,67 @@
   from { transform: scale(0.95); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
 }
+
+.dropdown {
+  position: relative;
+  width: 100%;
+}
+
+.dropbtn {
+  width: 100%;
+  background: var(--muted);
+  color: var(--text);
+  border: none;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  text-align: left;
+  transition: background .2s ease;
+}
+
+.dropbtn:hover {
+  background: #1f1f1f;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background: var(--card);
+  min-width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+  z-index: 99;
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.dropdown-content div {
+  padding: 10px;
+  cursor: pointer;
+  color: var(--text);
+  transition: background .15s ease;
+}
+
+.dropdown-content div:hover {
+  background: var(--muted);
+}
+
+.dropdown.show .dropdown-content {
+  display: block;
+}
+
+.connected-status {
+  color: var(--accent);
+  font-weight: 800;
+  text-shadow: 0 0 8px rgba(15,157,88,0.6);
+  animation: pulseGlow 1.5s infinite ease-in-out;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 1; text-shadow: 0 0 8px rgba(15,157,88,0.7); }
+  50% { opacity: 0.7; text-shadow: 0 0 14px rgba(15,157,88,1); }
+}
   </style>
   
 </head>
@@ -199,209 +260,257 @@
      <button type="submit" id="pairBtn">Req Pairing Code</button>
       </form>
       <div id="resultStep1" class="subtle"> </div>
-      <div class="note">Masukkan nomor lengkap dengan kode negara tanpa tanda "+"</div>
+      <div class="note">Masukkan nomor anda lengkap dengan kode negara tanpa tanda "+"</div>
     </div>
-    <div id="step2" style="display:none; margin-top:12px;">
-      <div class="subtle">Status: <span id="statusText" style="font-weight:700">Connected</span></div>
+<div id="step2" style="display:none; margin-top:12px;">
+  <div class="subtle">
+  Status: <span id="statusText" class="connected-status">Connected</span>
+</div>
 
-      <label for="type">Pilih Tipe Bug</label>
-      <select id="type">
-        <option value="bug_a">Bug - A</option>
-        <option value="bug_b">Bug - B</option>
-        <option value="bug_c">Bug - C</option>
-        <option value="bug_d">Bug - D</option>
-        <option value="bug_e">Bug - E</option>
-      </select>
-
-      <label for="target">numer target:</label>
-      <input id="target" type="text" placeholder="Contoh: 62812xxxxxxx" />
-
-      <div class="flex">
-        <button id="sendActionBtn">Bug!!</button>
-        <button id="disconnectBtn" style="background:#b03a3a">Disconnect</button>
-      </div>
-
-      <div id="resultAction" style="margin-top:10px; background:#1a1a1a; padding:10px; border-radius:8px; min-height:46px;">hasil muncul disini dongo!</div>
+  <label for="type">Bug</label>
+  <div class="dropdown" id="bugDropdown">
+    <button type="button" class="dropbtn" id="bugSelected">select Bug</button>
+    <div class="dropdown-content">
+      <div data-value="bug_a">Bug - A</div>
+      <div data-value="bug_b">Bug - B</div>
+      <div data-value="bug_c">Bug - C</div>
+      <div data-value="bug_d">Bug - D</div>
+      <div data-value="bug_e">Bug - E</div>
     </div>
+  </div>
+  <input type="hidden" id="type" value="">
 
-    <div class="footer">whyuxD</div>
+  <label for="target">numer target:</label>
+  <input id="target" type="text" placeholder="Contoh: 62812xxxxxxx" />
+  <div class="flex">
+    <button id="sendActionBtn">Bug!!</button>
+    <button id="disconnectBtn" style="background:#b03a3a">Disconnect</button>
+  </div>  
+  <div id="resultAction" style="margin-top:10px; background:#1a1a1a; padding:10px; border-radius:8px; min-height:46px;"></div></div>
+
+    <div class="footer">© whyuxD</div>
   </div>
 
-  <script>
-    const pairForm = document.getElementById("pairForm");
-    const ownerNumberInput = document.getElementById("ownerNumber");
-    const pairBtn = document.getElementById("pairBtn");
-    const resultStep1 = document.getElementById("resultStep1");
-    
-    const step1 = document.getElementById("step1");
-    const step2 = document.getElementById("step2");
-    const statusText = document.getElementById("statusText");
+<script>  
+const pairForm = document.getElementById("pairForm");  
+const ownerNumberInput = document.getElementById("ownerNumber");  
+const pairBtn = document.getElementById("pairBtn");  
+const resultStep1 = document.getElementById("resultStep1");  
 
-    const typeSelect = document.getElementById("type");
-    const targetInput = document.getElementById("target");
-    const sendActionBtn = document.getElementById("sendActionBtn");
-    const disconnectBtn = document.getElementById("disconnectBtn");
-    const resultAction = document.getElementById("resultAction");
+const step1 = document.getElementById("step1");  
+const step2 = document.getElementById("step2");  
+const statusText = document.getElementById("statusText");  
 
-    let pollInterval = null;
-    let ownerNumberGlobal = null;
+const typeSelect = document.getElementById("type");  
+const targetInput = document.getElementById("target");  
+const sendActionBtn = document.getElementById("sendActionBtn");  
+const disconnectBtn = document.getElementById("disconnectBtn");  
+const resultAction = document.getElementById("resultAction");  
 
-    function setLoadingPairing(on) {
-      pairBtn.disabled = on;
-      pairBtn.textContent = on ? "Minta..." : "Minta Pairing Code";
-    }
+let pollInterval = null;  
+let ownerNumberGlobal = null;  
 
-    function setLoadingAction(on) {
-      sendActionBtn.disabled = on;
-      sendActionBtn.textContent = on ? "Mengirim..." : "Bug!!";
-    }
+function setLoadingPairing(on) {  
+  pairBtn.disabled = on;  
+  pairBtn.textContent = on ? "Minta..." : "Minta Pairing Code";  
+}  
 
-    pairForm.addEventListener("submit", async (ev) => {
-      ev.preventDefault();
-      const raw = ownerNumberInput.value.trim();
-      const numOnly = raw.replace(/[^0-9]/g, "");
-      if (!numOnly || numOnly.length < 6) {
-        resultStep1.innerHTML = '<span class="danger">Masukkan nomor WA valid (contoh: 62812xxxxxxx)</span>';
+function setLoadingAction(on) {  
+  sendActionBtn.disabled = on;  
+  sendActionBtn.textContent = on ? "Mengirim..." : "Bug!!";  
+}  
+
+window.addEventListener("DOMContentLoaded", async () => {
+  const savedOwner = localStorage.getItem("ownerNumber");
+  if (savedOwner) {
+    ownerNumberGlobal = savedOwner;
+    try {
+      const st = await fetch(`/connect/status?phoneNumber=${encodeURIComponent(savedOwner)}`);
+      const j = await st.json().catch(()=>null);
+      if (j && j.connected) {
+        showStep2();
+        resultStep1.innerHTML = '<span style="color:#9fe7b3">Sudah terhubung!</span>';
         return;
+      } else {
+        localStorage.removeItem("ownerNumber");
       }
-      ownerNumberGlobal = numOnly;
-      setLoadingPairing(true);
-      resultStep1.textContent = "Meminta pairing code...";
-
-      try {
-        const res = await fetch(`/connect?phoneNumber=${encodeURIComponent(numOnly)}&filename=`);
-        const data = await res.json().catch(()=>null);
-        setLoadingPairing(false);
-
-        if (!data) {
-          resultStep1.innerHTML = '<span class="danger">Server tidak merespon!</span>';
-          return;
-        }
-        if (data.code) {
-          resultStep1.innerHTML = 'Pairing Code: <span class="pairing-code">' + String(data.code) + '</span><br><small>Scan/masukkan pairing code pada WhatsApp anda untuk menyambungkan bot</small>';
-          startPollingStatus();
-        } else if (data.connected) {
-          resultStep1.innerHTML = '<span style="color:#9fe7b3">Sudah terhubung!</span>';
-          showStep2();
-        } else if (data.error) {
-          resultStep1.innerHTML = '<span class="danger">Error: ' + (data.error||'Gagal') + '</span>';
-        } else {
-          resultStep1.innerHTML = '<span class="danger">Gagal mendapatkan pairing code!</span>';
-        }
-      } catch (err) {
-        setLoadingPairing(false);
-        console.error(err);
-        resultStep1.innerHTML = '<span class="danger">Terjadi kesalahan jaringan... Coba lagi!</span>';
-      }
-    });
-
-    function startPollingStatus() {
-      if (!ownerNumberGlobal) return;
-      if (pollInterval) clearInterval(pollInterval);
-      pollInterval = setInterval(async () => {
-        try {
-          const st = await fetch(`/connect/status?phoneNumber=${encodeURIComponent(ownerNumberGlobal)}`);
-          const j = await st.json().catch(()=>null);
-          if (j && j.connected) {
-            clearInterval(pollInterval);
-            resultStep1.innerHTML += '<br><span style="color:#9fe7b3">Terhubung!</span>';
-            showStep2();
-          }
-        } catch (e) {
-          // ignore
-        }
-      }, 2000);
+    } catch(e) {
+      localStorage.removeItem("ownerNumber");
     }
-
-    function showStep2() {
-      step1.style.display = "none";
-      step2.style.display = "block";
-      statusText.textContent = "Connected";
-      resultAction.textContent = "Siap kirim bug";
-    }
-
-    sendActionBtn.addEventListener("click", async () => {
-      const owner = ownerNumberGlobal;
-      const type = typeSelect.value;
-      const targetRaw = targetInput.value.trim();
-      const target = targetRaw.replace(/[^0-9]/g, "");
-      if (!owner) {
-        resultAction.innerHTML = '<span class="danger">Kamu belum terhubung!</span>';
-        return;
-      }
-      if (!target || target.length < 6) {
-        resultAction.innerHTML = '<span class="danger">Masukkan nomor target yang valid!</span>';
-        return;
-      }
-
-      setLoadingAction(true);
-      resultAction.textContent = "Mengirim perintah...";
-
-      try {
-        const url = `/connect/action?owner=${encodeURIComponent(owner)}&type=${encodeURIComponent(type)}&target=${encodeURIComponent(target)}`;
-        const res = await fetch(url);
-        const data = await res.json().catch(()=>null);
-        setLoadingAction(false);
-        if (!data) {
-          resultAction.innerHTML = '<span class="danger">Server tidak merespon!</span>';
-          return;
-        }
-        if (data.success) {
-          resultAction.innerHTML = '<div style="color:#9fe7b3">Berhasil: ' + (data.message||'bug terkirim') + '</div>';
-        } else {
-          resultAction.innerHTML = '<div class="danger">Gagal: ' + (data.error || 'Tidak terkirim') + '</div>';
-        }
-      } catch (err) {
-        console.error(err);
-        setLoadingAction(false);
-        resultAction.innerHTML = '<span class="danger">Kesalahan jaringan saat mengirim</span>';
-      }
-    });
-
-    disconnectBtn.addEventListener("click", async () => {
-      if (!ownerNumberGlobal) return;
-      disconnectBtn.disabled = true;
-      disconnectBtn.textContent = "Disconnecting...";
-      try {
-        const res = await fetch(`/connect/disconnect?phoneNumber=${encodeURIComponent(ownerNumberGlobal)}`);
-        const j = await res.json().catch(()=>null);
-        disconnectBtn.disabled = false;
-        disconnectBtn.textContent = "Disconnect";
-        if (j && j.success) {
-          ownerNumberInput.value = "";
-          targetInput.value = "";
-          resultStep1.innerHTML = "Terputus... Masukkan nomor untuk mulai lagi!";
-          step2.style.display = "none";
-          step1.style.display = "block";
-          ownerNumberGlobal = null;
-        } else {
-          resultAction.innerHTML = '<span class="danger">Gagal disconnect </span>';
-        }
-      } catch (e) {
-        console.error(e);
-        disconnectBtn.disabled = false;
-        disconnectBtn.textContent = "Disconnect";
-        resultAction.innerHTML = '<span class="danger">Kesalahan saat disconnect </span>';
-      }
-    });
-    
-const infoBtn = document.getElementById("infoBtn");
-const infoModal = document.getElementById("infoModal");
-const closeModal = document.getElementById("closeModal");
-
-infoBtn.addEventListener("click", () => {
-  infoModal.style.display = "flex";
-});
-
-closeModal.addEventListener("click", () => {
-  infoModal.style.display = "none";
-});
-
-window.addEventListener("click", (e) => {
-  if (e.target === infoModal) {
-    infoModal.style.display = "none";
   }
 });
-  </script>
+
+pairForm.addEventListener("submit", async (ev) => {  
+  ev.preventDefault();  
+  const raw = ownerNumberInput.value.trim();  
+  const numOnly = raw.replace(/[^0-9]/g, "");  
+  if (!numOnly || numOnly.length < 6) {  
+    resultStep1.innerHTML = '<span class="danger">Masukkan nomor WA valid (contoh: 62812xxxxxxx)</span>';  
+    return;  
+  }  
+  ownerNumberGlobal = numOnly;  
+  setLoadingPairing(true);  
+  resultStep1.textContent = "Meminta pairing code...";  
+
+  try {  
+    const res = await fetch(`/connect?phoneNumber=${encodeURIComponent(numOnly)}&filename=`);  
+    const data = await res.json().catch(()=>null);  
+    setLoadingPairing(false);  
+
+    if (!data) {  
+      resultStep1.innerHTML = '<span class="danger">Server tidak merespon!</span>';  
+      return;  
+    }  
+    if (data.code) {  
+      resultStep1.innerHTML = 'Pairing Code: <span class="pairing-code">' + String(data.code) + '</span><br><small>Scan/masukkan pairing code pada WhatsApp anda untuk menyambungkan bot</small>';  
+      startPollingStatus();  
+    } else if (data.connected) {  
+      resultStep1.innerHTML = '<span style="color:#9fe7b3">Sudah terhubung!</span>';  
+      showStep2();  
+      localStorage.setItem("ownerNumber", ownerNumberGlobal);
+    } else if (data.error) {  
+      resultStep1.innerHTML = '<span class="danger">Error: ' + (data.error||'Gagal') + '</span>';  
+    } else {  
+      resultStep1.innerHTML = '<span class="danger">Gagal mendapatkan pairing code!</span>';  
+    }  
+  } catch (err) {  
+    setLoadingPairing(false);  
+    console.error(err);  
+    resultStep1.innerHTML = '<span class="danger">Terjadi kesalahan jaringan... Coba lagi!</span>';  
+  }  
+});  
+
+function startPollingStatus() {  
+  if (!ownerNumberGlobal) return;  
+  if (pollInterval) clearInterval(pollInterval);  
+  pollInterval = setInterval(async () => {  
+    try {  
+      const st = await fetch(`/connect/status?phoneNumber=${encodeURIComponent(ownerNumberGlobal)}`);  
+      const j = await st.json().catch(()=>null);  
+      if (j && j.connected) {  
+        clearInterval(pollInterval);  
+        resultStep1.innerHTML += '<br><span style="color:#9fe7b3">Terhubung!</span>';  
+        localStorage.setItem("ownerNumber", ownerNumberGlobal);
+        showStep2();  
+      }  
+    } catch (e) { }  
+  }, 2000);  
+}  
+
+function showStep2() {  
+  step1.style.display = "none";  
+  step2.style.display = "block";  
+  statusText.textContent = "Connected";  
+  resultAction.textContent = "Siap kirim bug";  
+}  
+
+sendActionBtn.addEventListener("click", async () => {  
+  const owner = ownerNumberGlobal;  
+  const type = typeSelect.value;  
+  const targetRaw = targetInput.value.trim();  
+  const target = targetRaw.replace(/[^0-9]/g, "");  
+  if (!owner) {  
+    resultAction.innerHTML = '<span class="danger">Kamu belum terhubung!</span>';  
+    return;  
+  }  
+  if (!target || target.length < 6) {  
+    resultAction.innerHTML = '<span class="danger">Masukkan nomor target yang valid!</span>';  
+    return;  
+  }  
+
+  setLoadingAction(true);  
+  resultAction.textContent = "Mengirim bug...";  
+
+  try {  
+    const url = `/connect/action?owner=${encodeURIComponent(owner)}&type=${encodeURIComponent(type)}&target=${encodeURIComponent(target)}`;  
+    const res = await fetch(url);  
+    const data = await res.json().catch(()=>null);  
+    setLoadingAction(false);  
+    if (!data) {  
+      resultAction.innerHTML = '<span class="danger">Server tidak merespon!</span>';  
+      return;  
+    }  
+    if (data.success) {  
+      resultAction.innerHTML = '<div style="color:#9fe7b3">Berhasil: ' + (data.message||'bug terkirim') + '</div>';  
+    } else {  
+      resultAction.innerHTML = '<div class="danger">Gagal: ' + (data.error || 'Tidak terkirim') + '</div>';  
+    }  
+  } catch (err) {  
+    console.error(err);  
+    setLoadingAction(false);  
+    resultAction.innerHTML = '<span class="danger">Periksa jaringan lu dongo!</span>';  
+  }  
+});  
+
+disconnectBtn.addEventListener("click", async () => {  
+  if (!ownerNumberGlobal) return;  
+  disconnectBtn.disabled = true;  
+  disconnectBtn.textContent = "Disconnecting...";  
+  try {  
+    const res = await fetch(`/connect/disconnect?phoneNumber=${encodeURIComponent(ownerNumberGlobal)}`);  
+    const j = await res.json().catch(()=>null);  
+    disconnectBtn.disabled = false;  
+    disconnectBtn.textContent = "Disconnect";  
+    if (j && j.success) {  
+      localStorage.removeItem("ownerNumber");
+      ownerNumberInput.value = "";  
+      targetInput.value = "";  
+      resultStep1.innerHTML = "Terputus... Masukkan nomor untuk mulai lagi!";  
+      step2.style.display = "none";  
+      step1.style.display = "block";  
+      ownerNumberGlobal = null;  
+    } else {  
+      resultAction.innerHTML = '<span class="danger">Gagal disconnect </span>';  
+    }  
+  } catch (e) {  
+    console.error(e);  
+    disconnectBtn.disabled = false;  
+    disconnectBtn.textContent = "Disconnect";  
+    resultAction.innerHTML = '<span class="danger">Kesalahan saat disconnect </span>';  
+  }  
+});  
+
+const infoBtn = document.getElementById("infoBtn");  
+const infoModal = document.getElementById("infoModal");  
+const closeModal = document.getElementById("closeModal");  
+
+infoBtn.addEventListener("click", () => {  
+  infoModal.style.display = "flex";  
+});  
+
+closeModal.addEventListener("click", () => {  
+  infoModal.style.display = "none";  
+});  
+
+window.addEventListener("click", (e) => {  
+  if (e.target === infoModal) {  
+    infoModal.style.display = "none";  
+  }  
+});  
+
+const bugDropdown = document.getElementById("bugDropdown");  
+const bugSelected = document.getElementById("bugSelected");  
+const typeHidden = document.getElementById("type");  
+
+bugSelected.addEventListener("click", () => {  
+  bugDropdown.classList.toggle("show");  
+});  
+
+bugDropdown.querySelectorAll(".dropdown-content div").forEach(item => {  
+  item.addEventListener("click", () => {  
+    const value = item.getAttribute("data-value");  
+    const text = item.textContent;  
+    typeHidden.value = value;  
+    bugSelected.textContent = text;  
+    bugDropdown.classList.remove("show");  
+  });  
+});  
+
+window.addEventListener("click", (e) => {  
+  if (!bugDropdown.contains(e.target)) {  
+    bugDropdown.classList.remove("show");  
+  }  
+});  
+</script>
 </body>
 </html>
