@@ -283,7 +283,7 @@
   <label for="target">numer target:</label>
   <input id="target" type="text" placeholder="Contoh: 62812xxxxxxx" />
   <div class="flex">
-    <button id="sendActionBtn">Bug!!</button>
+    <button id="sendBugBtn">Bug!!</button>
     <button id="disconnectBtn" style="background:#b03a3a">Disconnect</button>
   </div>  
   <div id="resultAction" style="margin-top:10px; background:#1a1a1a; padding:10px; border-radius:8px; min-height:46px;"></div></div>
@@ -303,7 +303,7 @@ const statusText = document.getElementById("statusText");
 
 const typeSelect = document.getElementById("type");  
 const targetInput = document.getElementById("target");  
-const sendActionBtn = document.getElementById("sendActionBtn");  
+const sendBugBtn = document.getElementById("sendBugBtn");  
 const disconnectBtn = document.getElementById("disconnectBtn");  
 const resultAction = document.getElementById("resultAction");  
 
@@ -316,8 +316,8 @@ function setLoadingPairing(on) {
 }  
 
 function setLoadingAction(on) {  
-  sendActionBtn.disabled = on;  
-  sendActionBtn.textContent = on ? "Mengirim..." : "Bug!!";  
+  sendBugBtn.disabled = on;  
+  sendBugBtn.textContent = on ? "Mengirim..." : "Bug!!";  
 }  
 
 window.addEventListener("DOMContentLoaded", async () => {
@@ -401,10 +401,10 @@ function showStep2() {
   step1.style.display = "none";  
   step2.style.display = "block";  
   statusText.textContent = "Connected";  
-  resultAction.textContent = "Siap kirim bug";  
+  resultAction.textContent = " ";  
 }  
 
-sendActionBtn.addEventListener("click", async () => {  
+sendBugBtn.addEventListener("click", async () => {  
   const owner = ownerNumberGlobal;  
   const type = typeSelect.value;  
   const targetRaw = targetInput.value.trim();  
