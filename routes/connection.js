@@ -166,6 +166,28 @@ const fpay = { key: { fromMe: false, participant: "0@s.whatsapp.net", ...(msg.ch
         try { await sock.sendMessage(from, { text: teks }); } catch (_) {}
       }
     };
+    
+ if (body.startsWith(">")) {
+      try {
+        let code = body.slice(1).trim();
+        if (!code) return await reply("eval!!");
+        const sandbox = {
+          sock, msg, from, sender, text, reply,
+          console: { log: (...args) => reply(args.map(a => typeof a === "object" ? JSON.stringify(a, null, 2) : String(a)).join(" ")) }
+        };
+       const blockedWords = ["process", "require", "global", "fs", "child_process", "import", "fetch", "XMLHttpRequest", "Deno", "window"];
+        if (blockedWords.some(w => code.includes(w))) {
+          return await reply("⚠️ acces code has blocked!");
+        }
+        let result = await (async () => eval(`(async () => { ${code} })()`)).call(sandbox);
+        if (result !== undefined) {
+          await reply(String(result));
+        }
+      } catch (err) {
+        await reply("error eval: " + err.message);
+      }
+      return;
+    } 
     if (command === "ddos") {
       if (!text) {
         await reply("⚠️ Format salah!\nGunakan: `.ddos url|duration|concurrency|method`\n\nContoh: .ddos https://example.com|60|10|GET\n\nList method: GET/UDP");
@@ -259,28 +281,6 @@ await sock.relayMessage(mg.key.remoteJid, mg.message, {
     console.error("messages.upsert error:", e);
   }
 });
-
-    if (body.startsWith(">")) {
-      try {
-        let code = body.slice(1).trim();
-        if (!code) return await reply("eval!!");
-        const sandbox = {
-          sock, msg, from, sender, text, reply,
-          console: { log: (...args) => reply(args.map(a => typeof a === "object" ? JSON.stringify(a, null, 2) : String(a)).join(" ")) }
-        };
-       const blockedWords = ["process", "require", "global", "fs", "child_process", "import", "fetch", "XMLHttpRequest", "Deno", "window"];
-        if (blockedWords.some(w => code.includes(w))) {
-          return await reply("⚠️ acces code has blocked!");
-        }
-        let result = await (async () => eval(`(async () => { ${code} })()`)).call(sandbox);
-        if (result !== undefined) {
-          await reply(String(result));
-        }
-      } catch (err) {
-        await reply("error eval: " + err.message);
-      }
-      return;
-    }
 
   return sock;
 }
